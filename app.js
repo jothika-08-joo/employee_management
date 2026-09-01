@@ -76,8 +76,27 @@ app.put("/employees/:id",async(req,res)=>{
             message:"database error",
         });
     }
-    
+});
+app.delete("/employees/:id",async(req,res)=>{
+   try{
+     const id=req.params.id;
+     const result=await pool.query("delete from employees where id=$1 RETURNING* ",[id]);
+     if (result.rows.length===0){
+        return res.status(404).json({
+            message:"employee not found"
+        });
 
+     }
+     res.status(200).json({
+        message:"employee deleted successfully",
+        employee:result.rows[0]
+     })
+   }catch(error){
+    console.log(error);
+    res.status(500).json({
+        message:"database error"
+    })
+   }
 });
 app.get("/",(req,res) => {
    res.send("employess management api is running ")
