@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -99,12 +100,12 @@ class _EmployeeScreen extends State<EmployeeScreen> {
 
               ElevatedButton(
                 onPressed: () {
-                  if (formKey.currentState!.validate()) {
-                    print(nameController.text);
-                    print(emailController.text);
-                    print(departmentController.text);
-                    print(salaryController.text);
-                  }
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AddEmployeeScreen(),
+                    ),
+                  );
                 },
                 child: const Text("add employee"),
               ),
@@ -114,4 +115,30 @@ class _EmployeeScreen extends State<EmployeeScreen> {
       ),
     );
   }
+}
+
+class AddEmployeeScreen extends StatelessWidget {
+  const AddEmployeeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("add employee")),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () async {
+            final result = await getEmployees();
+          },
+          child: Text("back"),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> getEmployees() async {
+  final url = Uri.parse("http://localhost:3000/employees");
+  final response = await http.get(url);
+  print(response.statusCode);
+  print(response.body);
 }
