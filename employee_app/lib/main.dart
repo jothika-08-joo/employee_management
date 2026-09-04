@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(const MyApp());
@@ -29,6 +30,24 @@ class _EmployeeScreen extends State<EmployeeScreen> {
   final departmentController = TextEditingController();
   final salaryController = TextEditingController();
   final formKey = GlobalKey<FormState>();
+
+  Future<void> addEmployee() async {
+    final url = Uri.parse("http://localhost:3000/employees");
+    final body = {
+      "name": nameController.text.trim(),
+      "email": emailController.text.trim(),
+      "department": departmentController.text.trim(),
+      "salary": double.parse(salaryController.text.trim()),
+    };
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(body),
+    );
+    final data = jsonDecode(response.body);
+    print(data["message"]);
+    print(data["employee"]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,13 +118,10 @@ class _EmployeeScreen extends State<EmployeeScreen> {
               SizedBox(height: 16),
 
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AddEmployeeScreen(),
-                    ),
-                  );
+                onPressed: () async {
+                  if (formKey.currentState!.validate()) {
+                    await addEmployee();
+                  }
                 },
                 child: const Text("add employee"),
               ),
@@ -140,5 +156,8 @@ Future<void> getEmployees() async {
   final url = Uri.parse("http://localhost:3000/employees");
   final response = await http.get(url);
   print(response.statusCode);
-  print(response.body);
+  final data = jsonDecode(response.body);
+  print(data);
+  print(data[0]);
+  print(data[0]["name"]);
 }
